@@ -1,0 +1,28 @@
+[project]
+name = "sale-synchronization"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiohttp>=3.13.3",
+    "beartype>=0.22.9",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "kit-api @ git+https://github.com/lok101/kit-vending-api.git@refactor/simplify-models",
+    "moy-sklad-api @ git+https://github.com/lok101/moysklad-api.git@ver_03",
+    "tzlocal>=5.3.1",
+    "pydantic-settings>=2.12.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "freezegun>=1.5.5",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["."]
