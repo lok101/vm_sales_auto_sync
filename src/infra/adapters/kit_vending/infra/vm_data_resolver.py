@@ -26,7 +26,7 @@ def _extract_vending_machine_id(vending_machine_name: str) -> str | None:
 class VendingMachineDataResolverAdapter:
     kit_vending_api_client: KitVendingAPIClient
 
-    _id_by_vm_ex_id: dict[int, VMId] | None = None
+    _vm_id_by_code: dict[int, str] | None = None
 
     async def load(self) -> None:
 
@@ -35,7 +35,7 @@ class VendingMachineDataResolverAdapter:
         if not vending_machines:
             raise ResolverCacheLoadingError("От API кит вендинг не были получены аппараты.")
 
-        id_by_vm_ex_id: dict[int, VMId] = {}
+        vm_id_by_code: dict[int, str] = {}
 
         for vm in vending_machines:
             _id: str | None = _extract_vending_machine_id(vm.name)
@@ -44,14 +44,12 @@ class VendingMachineDataResolverAdapter:
             if _id is None or not ex_id:
                 continue
 
-            vm_id: VMId = VMId(_id)
+            vm_id_by_code[ex_id] = _id
 
-            id_by_vm_ex_id[ex_id] = vm_id
+        self._vm_id_by_code = vm_id_by_code
 
-        self._id_by_vm_ex_id = id_by_vm_ex_id
-
-    async def resolve_vm_id_by_ex_id(self, ex_id: int) -> VMId | None:
-        if self._id_by_vm_ex_id is None:
+    async def resolve_vm_code_by_id(self, ex_id: int) -> str | None:
+        if self._vm_id_by_code is None:
             await self.load()
 
-        return self._id_by_vm_ex_id.get(ex_id)
+        return self._vm_id_by_code.get(ex_id)

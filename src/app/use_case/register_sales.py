@@ -13,6 +13,7 @@ from src.app.ports import (
 
 from src.domain.entities import Sale
 from src.domain.value_objects import VMId, VMSales
+from src.infra.adapters.moy_sklad.exceptions import MoySkaldSalesRegisterError
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True, slots=True, kw_only=True)
 class RegisterVendingMachinesSales:
     sales_data_provider: VendingMachineSalesProviderPort
-    sales_registered_data_provider: SalesRegisterDataProviderPort
+    # sales_registered_data_provider: SalesRegisterDataProviderPort
     register_sales_port: RegisterSalesPort
 
     async def execute(self, day: date):
@@ -36,18 +37,21 @@ class RegisterVendingMachinesSales:
         for vm_sales in sales_by_vending_machines:
             vm_id: VMId = vm_sales.id
 
-            sales_already_registered: bool = await self.sales_registered_data_provider.is_sales_registered(day, vm_id)
+            # sales_already_registered: bool = await self.sales_registered_data_provider.is_sales_registered(day, vm_id)
+            #
+            # if sales_already_registered:
+            #     logger.info(
+            #         f"Для аппарата '{vm_id}' уже есть зарегистрированные продажи "
+            #         f"за переданный день: {day.isoformat()}."
+            #     )
+            #     return
 
-            if sales_already_registered:
-                logger.info(
-                    f"Для аппарата '{vm_id}' уже есть зарегистрированные продажи "
-                    f"за переданный день: {day.isoformat()}."
-                )
-                return
+            try:
+                await self.register_sales_port.register_vm_sales(vm_sales)
+                logger.info(f"Продажи для аппарата '{vm_id}' успешно зарегистрированы.")
 
-            await self.register_sales_port.register_vm_sales(vm_sales)
-
-            logger.info(f"Продажи для аппарата '{vm_id}' успешно зарегистрированы.")
+            except MoySkaldSalesRegisterError as ex:
+                logger.error(ex)
 
     @staticmethod
     def _group_sales_by_vending_machine(sales: list[Sale], day: date) -> list[VMSales]:

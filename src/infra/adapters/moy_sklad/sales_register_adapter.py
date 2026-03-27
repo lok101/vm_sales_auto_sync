@@ -41,7 +41,7 @@ class MoySkaldSalesRegisterAdapter(RegisterSalesPort):
     DOCUMENT_MOMENT_MINUTE: int = 55
 
     async def register_vm_sales(self, vm_sales: VMSales):
-        warehouse_id: UUID | None = await self.warehouse_data_resolver.resolve_ex_id_by_code(vm_sales.id.value)
+        warehouse_id: UUID | None = await self.warehouse_data_resolver.resolve_id_by_code(vm_sales.id.value)
 
         if warehouse_id is None:
             raise MoySkaldSalesRegisterResolutionError(
@@ -62,11 +62,12 @@ class MoySkaldSalesRegisterAdapter(RegisterSalesPort):
         for position, quantity in sales_by_positons.items():
             product, price = position
 
-            product_ex_id: UUID | None = await self.product_data_resolver.resolve_ex_id_by_code(product.id.value)
+            product_ex_id: UUID | None = await self.product_data_resolver.resolve_id_by_code(product.id.value)
 
             if product_ex_id is None:
                 raise MoySkaldSalesRegisterResolutionError(
-                    f"Не удалось получить МС Id для товара '{product.name}'."
+                    f"Не удалось получить МС Id для товара '{product.name}' "
+                    f"Продажи аппарата '{vm_sales.id.value}' не будут зарегистрированы."
                 )
 
             product_type: ProductType | None = await self.product_data_resolver.resolve_type_by_code(product.id.value)

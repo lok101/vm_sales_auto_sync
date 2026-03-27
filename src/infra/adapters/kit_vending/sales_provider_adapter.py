@@ -19,12 +19,12 @@ logger = logging.getLogger(__name__)
 
 @runtime_checkable
 class VendingMachineDataResolverPort(Protocol):
-    async def resolve_vm_id_by_ex_id(self, ex_id: int) -> VMId: pass
+    async def resolve_vm_code_by_id(self, vm_id: int) -> str | None: pass
 
 
 @runtime_checkable
 class ProductByMatrixResolverPort(Protocol):
-    async def resolve_product_name_by_position_in_matrix(self, matrix_id: int, line_number: int) -> str: pass
+    async def resolve_product_name_by_position_in_matrix(self, matrix_id: int, line_number: int) -> str | None: pass
 
 
 def _parse_product_name(product_name: str) -> tuple[str, str]:
@@ -85,10 +85,12 @@ class VendingMachineSalesProviderAdapter(VendingMachineSalesProviderPort):
 
     async def _map_to_domain(self, sale: SaleModel, product: Product | None) -> Sale:
         vm_ex_id: int = sale.vending_machine_id
-        vm_id: VMId | None = await self.vm_data_resolver.resolve_vm_id_by_ex_id(vm_ex_id)
+        vm_code: str | None = await self.vm_data_resolver.resolve_vm_code_by_id(vm_ex_id)
 
-        if vm_id is None:
-            raise SaleProviderMappingException(f"Не удалось получить Id для аппарата с внешним Id: {vm_ex_id}")
+        if vm_code is None:
+            raise SaleProviderResolutionException(f"Не удалось получить Id для аппарата с внешним Id: {vm_ex_id}")
+
+        vm_id: VMId = VMId(vm_code)
 
         if product is None:
             product: Product = self._map_to_product(sale.product_name)

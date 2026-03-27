@@ -49,6 +49,9 @@ async def main(accounts: list[KitVendingAccountDTO]):
         pass
 
 
+# если на аппарате нет продаж, он не попадает в набор, но нужно создать пустую отгрузку.
+# не реализована проверка на наличие отгрузки в этот день.
+
 if __name__ == "__main__":
     acc_settings = KitVendingAccountsSettings()
     accounts_dtos: list[KitVendingAccountDTO] = acc_settings.to_account_dtos()
