@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class RegisterVendingMachinesSales:
     sales_data_provider: VendingMachineSalesProviderPort
     sales_registered_data_provider: SalesRegisterDataProviderPort
-    register_sales_port: RegisterSalesPort
+    # register_sales_port: RegisterSalesPort
 
     async def execute(self, day: date):
         sales_for_day: list[Sale] = await self.sales_data_provider.get_sales_for_day(day)

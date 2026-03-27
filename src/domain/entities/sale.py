@@ -9,6 +9,7 @@ from src.domain.value_objects import VMId
 @dataclass(frozen=True, slots=True, kw_only=True)
 class Sale:
     vm_id: VMId
+    vm_name: str
     product: Product
     # line_number: int
 

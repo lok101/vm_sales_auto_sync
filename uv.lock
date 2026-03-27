@@ -184,7 +184,7 @@ wheels = [
 [[package]]
 name = "kit-api"
 version = "0.2.6"
-source = { git = "https://github.com/lok101/kit-vending-api.git?rev=refactor%2Fsimplify-models#1420bb8bfab7c8dc6ded542494dd970103593bf9" }
+source = { git = "https://github.com/lok101/kit-vending-api.git?rev=refactor%2Fsimplify-models#5f3b5c0245f916520430bfb75ed9838dac2007b9" }
 dependencies = [
     { name = "aiohttp" },
     { name = "beartype" },

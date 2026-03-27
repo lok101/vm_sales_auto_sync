@@ -10,3 +10,4 @@ wheels/
 .venv
 /__test__.py
 /.env
+/kit_vending_accounts.json
