@@ -9,7 +9,7 @@ from kit_api import KitVendingAPIClient, SaleModel
 from src.app.ports import VendingMachineSalesProviderPort
 from src.domain.entities import Sale
 from src.domain.entities.product import Product
-from src.domain.value_objects import VMId, ProductId
+from src.domain.value_objects import VMId, ProductId, Money
 from src.infra.adapters.kit_vending.exceptions import SaleProviderMappingException, SalesProviderAdapterException, \
     SaleProviderResolutionException
 from src.project_timezone import PROJECT_TIMEZONE
@@ -93,10 +93,13 @@ class VendingMachineSalesProviderAdapter(VendingMachineSalesProviderPort):
         if product is None:
             product: Product = self._map_to_product(sale.product_name)
 
+        price: Money = Money(kopeck=int(sale.price * 100)) # приходит в рублях, переводим в копейки.
+
         return Sale(
             vm_id=vm_id,
             vm_name=sale.vending_machine_name,
-            product=product
+            product=product,
+            price=price,
         )
 
     @staticmethod

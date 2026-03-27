@@ -1,5 +1,4 @@
 import logging
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import date
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 class RegisterVendingMachinesSales:
     sales_data_provider: VendingMachineSalesProviderPort
     sales_registered_data_provider: SalesRegisterDataProviderPort
-    # register_sales_port: RegisterSalesPort
+    register_sales_port: RegisterSalesPort
 
     async def execute(self, day: date):
         sales_for_day: list[Sale] = await self.sales_data_provider.get_sales_for_day(day)
@@ -32,7 +31,7 @@ class RegisterVendingMachinesSales:
             logger.info(f"Не были получены продажи за указанные день: {day.isoformat()}.")
             return
 
-        sales_by_vending_machines: list[VMSales] = self._group_sales_by_vending_machine(sales_for_day)
+        sales_by_vending_machines: list[VMSales] = self._group_sales_by_vending_machine(sales_for_day, day)
 
         for vm_sales in sales_by_vending_machines:
             vm_id: VMId = vm_sales.id
@@ -51,7 +50,7 @@ class RegisterVendingMachinesSales:
             logger.info(f"Продажи для аппарата '{vm_id}' успешно зарегистрированы.")
 
     @staticmethod
-    def _group_sales_by_vending_machine(sales: list[Sale]) -> list[VMSales]:
+    def _group_sales_by_vending_machine(sales: list[Sale], day: date) -> list[VMSales]:
 
         sales_data: dict[VMId, list[Sale]] = defaultdict(list)
 
@@ -61,6 +60,7 @@ class RegisterVendingMachinesSales:
         return [
             VMSales(
                 id=vm_id,
-                sales=sales
+                sales=sales,
+                day=day
             ) for vm_id, sales in sales_data.items()
         ]

@@ -196,7 +196,7 @@ dependencies = [
 [[package]]
 name = "moy-sklad-api"
 version = "0.3"
-source = { git = "https://github.com/lok101/moysklad-api.git?rev=ver_03#5239031de12fc45e9d81c373a096be5c6b929f01" }
+source = { git = "https://github.com/lok101/moysklad-api.git?rev=ver_03#346c0d653a2c0b73bd7014b9b0ab38997b233656" }
 dependencies = [
     { name = "aiohttp" },
     { name = "beartype" },
