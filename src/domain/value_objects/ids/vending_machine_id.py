@@ -6,4 +6,4 @@ from beartype import beartype
 @beartype
 @dataclass(frozen=True, slots=True)
 class VMId:
-    value: int
+    value: str

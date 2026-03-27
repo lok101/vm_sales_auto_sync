@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from beartype import beartype
 from kit_api import KitVendingAPIClient, SaleModel
@@ -16,8 +16,9 @@ from src.project_timezone import PROJECT_TIMEZONE
 logger = logging.getLogger(__name__)
 
 
+@runtime_checkable
 class VendingMachineDataResolverPort(Protocol):
-    def resolve_vm_id_by_ex_id(self, ex_id: int) -> VMId | None: pass
+    async def resolve_vm_id_by_ex_id(self, ex_id: int) -> VMId | None: pass
 
 
 def _parse_product_name(product_name: str) -> tuple[str, str]:
@@ -44,8 +45,12 @@ class VendingMachineSalesProviderAdapter(VendingMachineSalesProviderPort):
         sales: list[SaleModel] = await self.kit_vending_api_client.get_sales(from_date=day_start, to_date=day_end)
 
         for sale_model in sales:
+            if "переплата" in sale_model.product_name.lower():
+                logger.info(f"Встречена позиция 'Переплата', она будет пропущена.")
+                continue
+
             try:
-                sale: Sale = self._map_to_domain(sale_model)
+                sale: Sale = await self._map_to_domain(sale_model)
                 res.append(sale)
 
             except SalesProviderAdapterException as ex:
@@ -53,9 +58,10 @@ class VendingMachineSalesProviderAdapter(VendingMachineSalesProviderPort):
 
         return res
 
-    def _map_to_domain(self, sale: SaleModel) -> Sale:
+    async def _map_to_domain(self, sale: SaleModel) -> Sale:
+
         vm_ex_id: int = sale.vending_machine_id
-        vm_id: VMId | None = self.vm_data_resolver.resolve_vm_id_by_ex_id(vm_ex_id)
+        vm_id: VMId | None = await self.vm_data_resolver.resolve_vm_id_by_ex_id(vm_ex_id)
 
         if vm_id is None:
             raise SaleProviderMappingException(f"Не удалось получить Id для аппарата с внешним Id: {vm_ex_id}")

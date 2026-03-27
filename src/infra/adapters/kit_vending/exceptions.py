@@ -1,3 +1,7 @@
+class ResolverCacheLoadingError(Exception):
+    pass
+
+
 class SalesProviderAdapterException(Exception):
     pass
 
